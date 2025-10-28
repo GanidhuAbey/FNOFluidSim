@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import h5py
 from torch.utils.data import Dataset, DataLoader
+import os
 
 save_path = './ckpt/'
 
@@ -23,8 +24,8 @@ class FluidH5Dataset(Dataset):
 
     def compute_mean_std(self):
         # compute mean and std
-        self.mean = torch.tensor(self.states.mean(axis=(0,1,3,4)), dtype=torch.float32).view(4,1,1)
-        self.std  = torch.tensor(self.states.std(axis=(0,1,3,4)), dtype=torch.float32).view(4,1,1)
+        self.mean = torch.tensor(self.states.mean(axis=(0,1,3,4)), dtype=torch.float32).view(7,1,1)
+        self.std  = torch.tensor(self.states.std(axis=(0,1,3,4)), dtype=torch.float32).view(7,1,1)
 
 
     def normalize(self, mean, std):
@@ -40,8 +41,8 @@ class FluidH5Dataset(Dataset):
         n = idx // (self.T - self.step_size)
         t = idx % (self.T - self.step_size)
 
-        X = self.states[n, t]          # shape (4, H, W)
-        Y = self.states[n, t + 1]      # shape (4, H, W)
+        X = self.states[n, t]          # shape (7, H, W)
+        Y = self.states[n, t + 1, :4]      # shape (4, H, W)
 
         X = torch.tensor(X, dtype=torch.float32)
         Y = torch.tensor(Y, dtype=torch.float32)
@@ -80,7 +81,7 @@ def train(train_data, test_data):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     operator = FNO(
-        in_channels=4,      # u, v, p, rho
+        in_channels=7,      # u, v, p, rho, u_s, v_s, rho_s
         out_channels=4,     # predict next-step u, v, p, rho
         n_modes=(32, 32),   # number of modes in fourier space
         hidden_channels=64, # internal channel width
@@ -133,6 +134,7 @@ def main():
         'std': train_data.std
     }
 
+    os.makedirs(save_path, exist_ok=True)
     torch.save(preprocesser, f'{save_path}preprocessor.pt')
 
     # train model

@@ -23,7 +23,7 @@ class FNOFluidSimulator(FluidSimulatorBase):
         
         # Load trained model        
         self.operator = FNO(
-            in_channels=4,      # u, v, p, rho
+            in_channels=7,      # u, v, p, rho, u_s, v_s, rho_s
             out_channels=4,     # predict next-step u, v, p, rho
             n_modes=(32, 32),   # number of modes in fourier space
             hidden_channels=64, # internal channel width
@@ -97,15 +97,15 @@ class FNOFluidSimulator(FluidSimulatorBase):
         - Current state: [u, v, density, pressure]
         """
         with torch.no_grad():
-            wp.launch(add_source, dim=(self.size, self.size),
-                    inputs=[self.u, self.u_source, dt])
-            wp.launch(add_source, dim=(self.size, self.size),
-                    inputs=[self.v, self.v_source, dt])
-            wp.launch(add_source, dim=(self.size, self.size),
-                    inputs=[self.density, self.density_source, dt])
+            # wp.launch(add_source, dim=(self.size, self.size),
+            #         inputs=[self.u, self.u_source, dt])
+            # wp.launch(add_source, dim=(self.size, self.size),
+            #         inputs=[self.v, self.v_source, dt])
+            # wp.launch(add_source, dim=(self.size, self.size),
+            #         inputs=[self.density, self.density_source, dt])
             
             # Prepare input: stack current state and forces
-            current_state = np.stack([self.u, self.v, self.density, self.pressure], axis=0)
+            current_state = np.stack([self.u, self.v, self.density, self.pressure, self.u_source, self.v_source, self.density_source], axis=0)
             #forces = np.stack([self.u_source, self.v_source, self.density_source], axis=0)
                     
             cx, cy = GRID_SIZE // 2, GRID_SIZE // 2
@@ -123,7 +123,7 @@ class FNOFluidSimulator(FluidSimulatorBase):
             next_state = self.operator.forward(current_state)
         
             # unnormalize output
-            next_state = next_state*std + mean
+            next_state = next_state*std[:4] + mean[:4]
 
             # Convert back to numpy
             next_state = next_state.cpu().numpy()[0]
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
     # Run simulation
     sim_time = 0.0
-    for frame in range(int(frame_count)):
+    for frame in range(int(300)):
         # Add sources
 
         temp_source = np.zeros((GRID_SIZE, GRID_SIZE), dtype=np.float32)

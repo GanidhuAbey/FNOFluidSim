@@ -8,11 +8,11 @@ import warp.sim.render
 wp.init()
 
 # Simulation parameters
-GRID_SIZE = 128
+GRID_SIZE = 32
 DOMAIN_SIZE = 5.0
 TOTAL_SIM_TIME = 20.0
 dt = 0.01
-frame_count = TOTAL_SIM_TIME / dt
+frame_count = 300 #TOTAL_SIM_TIME / dt
 diffusion = 0.0001
 viscosity = 0.00001
 amb_temperature = 1.0;

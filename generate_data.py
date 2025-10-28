@@ -42,7 +42,7 @@ def generate_training_data(
         sim = StableFluidsSimulator(grid_size, domain_size)
         
         # Random initial conditions
-        init_type = traj_idx % 4
+        init_type = 0
         
         if init_type == 0:
             # Single source in center with random velocity
@@ -110,8 +110,8 @@ def generate_training_data(
             density = sim.density.numpy()
             pressure = sim.pressure.numpy()
             
-            # Stack as channels: [u, v, density, pressure]
-            state = np.stack([u, v, density, pressure], axis=0)  # (4, H, W)
+            # Stack as channels: [u, v, density, pressure, vel_x_source, vel_y_source, density]
+            state = np.stack([u, v, density, pressure, vel_x_source, vel_y_source, density_source], axis=0)  # (7, H, W)
             
             # Stack forces as well
             force = np.stack([vel_x_source, vel_y_source, density_source], axis=0)  # (3, H, W)
