@@ -89,7 +89,7 @@ def train(train_data, test_data):
 
     trainer = Trainer(
         model=operator,
-        n_epochs=20,
+        n_epochs=100,
         verbose=True,
         device=device
     )
