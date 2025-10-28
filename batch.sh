@@ -26,3 +26,4 @@ conda activate /arc/home/ganidhu/venvs/532
 
 cd /scratch/st-pai-1/ganidhu/fluid_sim/
 python train.py
+python evaluate.py
