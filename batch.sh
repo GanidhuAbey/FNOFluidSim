@@ -22,7 +22,7 @@ module load miniconda3
 
 # activate conda env
 source ~/.bashrc
-conda activate /arc/home/ganidhu/venvs/fluid_sim
+conda activate /arc/home/ganidhu/venvs/532
 
 cd /scratch/st-pai-1/ganidhu/fluid_sim/
 python train.py
